@@ -94,6 +94,7 @@ export default function ProductModal({ product, onClose, onSaved }) {
     price: product.price ?? '',
   } : emptyForm);
   const [uploading, setUploading] = useState(false);
+  const [uploadingBg, setUploadingBg] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -227,17 +228,17 @@ export default function ProductModal({ product, onClose, onSaved }) {
                     className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
                     placeholder="https://... o sube una foto" />
                   <label className="cursor-pointer border border-gray-300 rounded-lg px-3 py-2 text-sm hover:bg-gray-50 transition whitespace-nowrap">
-                    {uploading ? '...' : 'Subir'}
+                    {uploadingBg ? '...' : 'Subir'}
                     <input type="file" accept="image/*" className="hidden" onChange={async e => {
                       const file = e.target.files[0];
                       if (!file) return;
-                      setUploading(true);
+                      setUploadingBg(true);
                       const fd = new FormData();
                       fd.append('image', file);
                       const res = await api.post('/products/upload-image', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
                       const bgUrl = res.data.url.startsWith('http') ? res.data.url : `${import.meta.env.VITE_STORAGE_URL || 'http://localhost:8000'}${res.data.url}`;
                       set('background_image', bgUrl);
-                      setUploading(false);
+                      setUploadingBg(false);
                     }} />
                   </label>
                 </div>
