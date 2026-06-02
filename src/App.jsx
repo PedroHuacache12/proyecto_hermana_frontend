@@ -8,6 +8,7 @@ import Dashboard from './pages/Dashboard';
 import Productos from './pages/Productos';
 import Catalogos from './pages/Catalogos';
 import Analytics from './pages/Analytics';
+import Usuarios from './pages/Usuarios';
 import CatalogoPublico from './pages/CatalogoPublico';
 
 function App() {
@@ -31,6 +32,7 @@ function App() {
             <Route path="productos" element={<Productos />} />
             <Route path="catalogos" element={<Catalogos />} />
             <Route path="analytics" element={<Analytics />} />
+            <Route path="usuarios" element={<Usuarios />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/dashboard" replace />} />

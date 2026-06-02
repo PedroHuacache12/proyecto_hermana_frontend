@@ -244,6 +244,19 @@ export default function CatalogoPublico() {
   );
 
   const products = catalog.products;
+
+  if (!products || products.length === 0) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-50 to-cyan-100 p-4">
+        <div className="bg-white rounded-2xl shadow-xl p-8 text-center max-w-sm w-full">
+          <p className="text-5xl mb-4">📦</p>
+          <h1 className="text-xl font-bold text-gray-700">{catalog.name}</h1>
+          <p className="text-gray-400 mt-2 text-sm">Este catálogo aún no tiene productos disponibles.</p>
+        </div>
+      </div>
+    );
+  }
+
   const product = products[productIndex];
   const image = IMG(product.images?.[0]);
   const liked = prevActions.some(a => a.product_id === product.id && a.action === 'like');
@@ -288,9 +301,17 @@ export default function CatalogoPublico() {
                   <p className="mt-4 text-[15px] leading-7 text-slate-600 lg:text-base lg:leading-8">{product.description}</p>
                 )}
                 {product.price && (
-                  <div className="mt-5 flex items-baseline gap-1.5" style={{ textShadow: '0 1px 3px rgba(255,255,255,0.8)' }}>
+                  <div className="mt-5" style={{ textShadow: '0 1px 3px rgba(255,255,255,0.8)' }}>
+                    {product.promotional_price && (
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-lg text-gray-400 line-through">S/ {product.price}</span>
+                        <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">PROMO</span>
+                      </div>
+                    )}
+                  <div className="flex items-baseline gap-1.5">
                     <span className="text-lg font-bold text-teal-700">S/</span>
-                    <span className="text-5xl font-black text-teal-700 leading-none">{product.price}</span>
+                    <span className="text-5xl font-black text-teal-700 leading-none">{product.promotional_price || product.price}</span>
+                  </div>
                   </div>
                 )}
               </div>

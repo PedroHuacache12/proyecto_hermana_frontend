@@ -77,7 +77,7 @@ function AddImageUrl({ onAdd }) {
 }
 
 const emptyForm = {
-  name: '', brand: '', description: '', price: '',
+  name: '', brand: '', description: '', price: '', promotional_price: '',
   benefits: [''], preparation: [''],
   images: [], ingredients: [], background_image: '', active: true,
 };
@@ -89,6 +89,7 @@ export default function ProductModal({ product, onClose, onSaved }) {
     benefits: product.benefits?.length ? product.benefits : [''],
     preparation: product.preparation?.length ? product.preparation : [''],
     brand: product.brand ?? '',
+    promotional_price: product.promotional_price ?? '',
     ingredients: product.ingredients ?? [],
     background_image: product.background_image ?? '',
     price: product.price ?? '',
@@ -133,6 +134,7 @@ export default function ProductModal({ product, onClose, onSaved }) {
         benefits: form.benefits.filter(b => b.trim()),
         preparation: form.preparation.filter(p => p.trim()),
         price: form.price === '' ? null : form.price,
+        promotional_price: form.promotional_price === '' ? null : form.promotional_price,
       };
       if (product) {
         await api.put(`/products/${product.id}`, payload);
@@ -193,11 +195,19 @@ export default function ProductModal({ product, onClose, onSaved }) {
                   rows={3} className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
                   placeholder="Descripción del producto..." />
               </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700">Precio (S/)</label>
-                <input type="number" value={form.price} onChange={e => set('price', e.target.value)}
-                  className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
-                  placeholder="0.00" />
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Precio (S/)</label>
+                  <input type="number" value={form.price} onChange={e => set('price', e.target.value)}
+                    className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    placeholder="0.00" />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Precio promocional (S/)</label>
+                  <input type="number" value={form.promotional_price} onChange={e => set('promotional_price', e.target.value)}
+                    className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    placeholder="Opcional" />
+                </div>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Fotos del producto</label>

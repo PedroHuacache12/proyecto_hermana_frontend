@@ -2,11 +2,15 @@ import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-const navItems = [
+const baseNavItems = [
   { to: '/dashboard', label: 'Inicio', icon: '🏠', end: true },
   { to: '/dashboard/productos', label: 'Productos', icon: '📦' },
   { to: '/dashboard/catalogos', label: 'Catálogos', icon: '📋' },
   { to: '/dashboard/analytics', label: 'Estadísticas', icon: '📊' },
+];
+
+const adminNavItems = [
+  { to: '/dashboard/usuarios', label: 'Usuarios', icon: '👥' },
 ];
 
 export default function DashboardLayout() {
@@ -27,7 +31,7 @@ export default function DashboardLayout() {
       </div>
 
       <nav className="flex-1 px-4 py-4 space-y-1">
-        {navItems.map(item => (
+        {[...baseNavItems, ...(user?.role === 'superadmin' ? adminNavItems : [])].map(item => (
           <NavLink
             key={item.to}
             to={item.to}
