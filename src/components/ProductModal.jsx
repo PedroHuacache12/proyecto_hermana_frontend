@@ -235,7 +235,8 @@ export default function ProductModal({ product, onClose, onSaved }) {
                       const fd = new FormData();
                       fd.append('image', file);
                       const res = await api.post('/products/upload-image', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
-                      set('background_image', `${import.meta.env.VITE_STORAGE_URL || 'http://localhost:8000'}${res.data.url}`);
+                      const bgUrl = res.data.url.startsWith('http') ? res.data.url : `${import.meta.env.VITE_STORAGE_URL || 'http://localhost:8000'}${res.data.url}`;
+                      set('background_image', bgUrl);
                       setUploading(false);
                     }} />
                   </label>
