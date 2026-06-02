@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
+import usePageTitle from '../hooks/usePageTitle';
 import api from '../lib/axios';
 
 import { storageUrl } from '../lib/storage';
 const IMG = storageUrl;
 
 export default function Analytics() {
+  usePageTitle('Estadísticas');
   const [summary, setSummary] = useState(null);
   const [catalogs, setCatalogs] = useState([]);
   const [selected, setSelected] = useState(null);

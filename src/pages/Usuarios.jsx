@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../lib/axios';
+import usePageTitle from '../hooks/usePageTitle';
 
 const emptyForm = { name: '', email: '', password: '', whatsapp_number: '', role: 'user' };
 
@@ -78,6 +79,7 @@ function UserModal({ user, onClose, onSaved }) {
 }
 
 export default function Usuarios() {
+  usePageTitle('Usuarios');
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState(false);

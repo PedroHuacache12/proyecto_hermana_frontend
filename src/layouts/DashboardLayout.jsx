@@ -103,6 +103,10 @@ export default function DashboardLayout() {
         <main className="flex-1 overflow-y-auto p-6">
           <Outlet />
         </main>
+        <footer className="flex-shrink-0 border-t border-gray-100 px-6 py-2 flex items-center justify-center gap-2">
+          <img src="/logo.png" className="h-4 object-contain opacity-40" alt="logo" />
+          <p className="text-xs text-gray-300">Desarrollado por <span className="text-teal-500 font-medium">Pedro Huacache</span></p>
+        </footer>
       </div>
     </div>
   );

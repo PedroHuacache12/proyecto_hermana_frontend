@@ -106,6 +106,7 @@ export default function CatalogoPublico() {
     publicApi.get(`/c/${slug}`)
       .then(async res => {
         setCatalog(res.data);
+        document.title = `${res.data.name} — ${res.data.brand_name || 'Catálogo'}`;
         const sid = sessionStorage.getItem(`session_${slug}`);
         if (sid) {
           const r = await publicApi.get(`/c/${slug}/actions?session_id=${sid}`).catch(() => ({ data: [] }));
@@ -395,6 +396,10 @@ export default function CatalogoPublico() {
           productIndex={productIndex}
           total={products.length}
         />
+        <div className="flex-shrink-0 bg-white border-t border-slate-100 py-1.5 flex items-center justify-center gap-2">
+          <img src="/logo.png" className="h-3 object-contain opacity-30" alt="logo" />
+          <p className="text-[10px] text-slate-300">Desarrollado por <span className="text-teal-400 font-medium">Pedro Huacache</span></p>
+        </div>
       </main>
     </div>
   );

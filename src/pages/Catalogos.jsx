@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import usePageTitle from '../hooks/usePageTitle';
 import api from '../lib/axios';
 import CatalogModal from '../components/CatalogModal';
 import CatalogProductsModal from '../components/CatalogProductsModal';
@@ -28,6 +29,7 @@ function CopyLink({ url }) {
 
 
 export default function Catalogos() {
+  usePageTitle('Catálogos');
   const [catalogs, setCatalogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);

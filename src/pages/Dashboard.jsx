@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../lib/axios';
+import usePageTitle from '../hooks/usePageTitle';
 
 export default function Dashboard() {
+  usePageTitle('Inicio');
   const { user } = useAuth();
   const [stats, setStats] = useState(null);
 

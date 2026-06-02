@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import api from '../lib/axios';
 import ProductModal from '../components/ProductModal';
+import usePageTitle from '../hooks/usePageTitle';
 
 export default function Productos() {
+  usePageTitle('Productos');
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
