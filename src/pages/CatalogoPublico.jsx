@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import publicApi from '../lib/publicApi';
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -35,15 +35,13 @@ const WA_SVG = (
   </svg>
 );
 
-function ProductDots({ total, current }) {
-  if (total <= 1) return null;
-
+function ProductDots({ page }) {
   return (
-    <div className="flex items-center justify-center gap-1.5" aria-label="Productos">
-      {Array.from({ length: total }).map((_, i) => (
+    <div className="flex items-center justify-center gap-1.5" aria-label="Páginas">
+      {[1, 2].map(p => (
         <span
-          key={i}
-          className={`h-1.5 rounded-full transition-all ${i === current ? 'w-5 bg-teal-600' : 'w-1.5 bg-teal-200'}`}
+          key={p}
+          className={`h-1.5 rounded-full transition-all ${p === page ? 'w-5 bg-teal-600' : 'w-1.5 bg-teal-200'}`}
         />
       ))}
     </div>
@@ -62,10 +60,10 @@ function IconButton({ children, onClick, disabled, activeClass, inactiveClass = 
   );
 }
 
-function BottomBar({ onPrev, onNext, canPrev, canNext, liked, archived, onLike, onArchive, onWhatsApp, productIndex, total }) {
+function BottomBar({ liked, archived, onLike, onArchive, onWhatsApp, page }) {
   return (
     <div className="flex-shrink-0 border-t border-slate-200 bg-white px-3 pb-3 pt-2 shadow-[0_-10px_30px_rgba(15,23,42,0.06)]">
-      <ProductDots total={total} current={productIndex} />
+      <ProductDots page={page} />
       <button
         onClick={onWhatsApp}
         className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-green-500 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-green-600"
@@ -73,12 +71,147 @@ function BottomBar({ onPrev, onNext, canPrev, canNext, liked, archived, onLike, 
         {WA_SVG} Solicitar por WhatsApp
       </button>
       <div className="mt-2 flex items-center gap-2">
-        <IconButton onClick={onPrev} disabled={!canPrev}>‹</IconButton>
         <IconButton onClick={onLike} activeClass={liked ? 'border-red-200 bg-red-50 text-red-500' : undefined}>♥</IconButton>
         <IconButton onClick={onArchive} activeClass={archived ? 'border-amber-200 bg-amber-50 text-amber-500' : undefined}>★</IconButton>
-        <IconButton onClick={onNext} disabled={!canNext}>›</IconButton>
       </div>
     </div>
+  );
+}
+
+function Page2({ product }) {
+  const hasBenefits = product.benefits?.length > 0;
+  const hasPrep = product.preparation?.length > 0;
+  const hasIngr = product.ingredients?.length > 0;
+
+  return (
+    <>
+      {/* MÓVIL: columna única */}
+      <div className="flex flex-col h-full bg-white overflow-y-auto md:hidden px-5 py-4 space-y-5">
+        {hasBenefits && (
+          <div>
+            <p className="mb-1.5 text-xs font-bold uppercase tracking-[0.18em] text-teal-700">Beneficios</p>
+            <h2 className="text-lg font-black text-slate-900 mb-3">{product.name}</h2>
+            <ul className="space-y-1.5">
+              {product.benefits.map((b, i) => (
+                <li key={i} className="flex gap-3 text-sm leading-5 text-slate-600">
+                  <span className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-teal-600" />
+                  <span>{b}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {hasPrep && (
+          <div>
+            <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-teal-700">Preparación</p>
+            <div className="space-y-2">
+              {product.preparation.map((step, i) => (
+                <div key={i} className="flex gap-3 rounded-xl border border-teal-100 bg-teal-50/70 px-3 py-2.5 text-sm leading-5 text-slate-700">
+                  <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-teal-600 text-xs font-bold text-white">{i + 1}</span>
+                  <span>{step}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        {hasIngr && (
+          <div>
+            <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-teal-700 text-center">Componentes</p>
+            <div className="flex flex-wrap justify-center gap-3">
+              {product.ingredients.map((ing, i) => (
+                <IngredientIcon key={i} icon={ing.icon} name={ing.name} />
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* TABLET (md–xl): 2 columnas, scroll natural */}
+      <div className="hidden md:flex xl:hidden flex-col bg-white overflow-y-auto">
+        <div className="grid grid-cols-2 border-b border-slate-100">
+          <div className="border-r border-slate-200 px-6 py-5">
+            <p className="mb-1.5 text-xs font-bold uppercase tracking-[0.18em] text-teal-700">Beneficios</p>
+            <h2 className="text-lg font-black text-slate-900 mb-3">{product.name}</h2>
+            {hasBenefits ? (
+              <ul className="space-y-1.5">
+                {product.benefits.map((b, i) => (
+                  <li key={i} className="flex gap-3 text-sm leading-5 text-slate-600">
+                    <span className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-teal-600" />
+                    <span>{b}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : <p className="text-sm text-slate-400">Sin beneficios cargados.</p>}
+          </div>
+          <div className="px-6 py-5">
+            <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-teal-700">Preparación</p>
+            {hasPrep ? (
+              <div className="space-y-2">
+                {product.preparation.map((step, i) => (
+                  <div key={i} className="flex gap-3 rounded-xl border border-teal-100 bg-teal-50/70 px-3 py-2.5 text-sm leading-5 text-slate-700">
+                    <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-teal-600 text-xs font-bold text-white">{i + 1}</span>
+                    <span>{step}</span>
+                  </div>
+                ))}
+              </div>
+            ) : <p className="text-sm text-slate-400">Sin preparación cargada.</p>}
+          </div>
+        </div>
+        {hasIngr && (
+          <div className="px-8 py-5">
+            <p className="mb-4 text-xs font-bold uppercase tracking-widest text-gray-500 text-center">Componentes</p>
+            <div className="flex flex-wrap justify-center gap-4">
+              {product.ingredients.map((ing, i) => (
+                <IngredientIcon key={i} icon={ing.icon} name={ing.name} />
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* DESKTOP (xl+): 2 columnas, altura fija sin scroll exterior */}
+      <div className="hidden xl:flex flex-col h-full bg-white overflow-hidden">
+        <div className="grid flex-1 grid-cols-2 min-h-0">
+          <div className="overflow-y-auto border-r border-slate-200 px-8 py-5 lg:px-10 lg:py-6">
+            <p className="mb-1.5 text-xs font-bold uppercase tracking-[0.18em] text-teal-700">Beneficios</p>
+            <h1 className="text-xl font-black leading-tight text-slate-900 lg:text-2xl">{product.name}</h1>
+            {hasBenefits ? (
+              <ul className="mt-3 space-y-2">
+                {product.benefits.map((b, i) => (
+                  <li key={i} className="flex gap-3 text-sm leading-5 text-slate-600">
+                    <span className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-teal-600" />
+                    <span>{b}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : <p className="mt-3 text-sm text-slate-400">Sin beneficios cargados.</p>}
+          </div>
+          <div className="overflow-y-auto px-8 py-5 lg:px-10 lg:py-6">
+            <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-teal-700">Preparación</p>
+            {hasPrep ? (
+              <div className="space-y-2">
+                {product.preparation.map((step, i) => (
+                  <div key={i} className="flex gap-3 rounded-xl border border-teal-100 bg-teal-50/70 px-3 py-2.5 text-sm leading-5 text-slate-700">
+                    <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-teal-600 text-xs font-bold text-white">{i + 1}</span>
+                    <span>{step}</span>
+                  </div>
+                ))}
+              </div>
+            ) : <p className="text-sm text-slate-400">Sin preparación cargada.</p>}
+          </div>
+        </div>
+        {hasIngr && (
+          <div className="flex-shrink-0 px-10 py-5 border-t border-gray-100">
+            <h3 className="font-bold text-gray-500 mb-4 text-xs uppercase tracking-widest text-center">Componentes</h3>
+            <div className="flex flex-wrap justify-center gap-4">
+              {product.ingredients.map((ing, i) => (
+                <IngredientIcon key={i} icon={ing.icon} name={ing.name} />
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </>
   );
 }
 
@@ -94,6 +227,7 @@ export default function CatalogoPublico() {
   const [error, setError] = useState('');
   const [productIndex, setProductIndex] = useState(0);
   const [page, setPage] = useState(1);
+  const touchStartX = useRef(null);
 
   const handleLogout = () => {
     sessionStorage.removeItem(`session_${slug}`);
@@ -119,6 +253,16 @@ export default function CatalogoPublico() {
         setStatus('expired');
       });
   }, [slug]);
+
+  useEffect(() => {
+    const onKey = (e) => {
+      if (status !== 'catalog') return;
+      if (e.key === 'ArrowRight') goNext();
+      if (e.key === 'ArrowLeft') goPrev();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [status, productIndex, page, catalog]);
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -262,9 +406,6 @@ export default function CatalogoPublico() {
   const image = IMG(product.images?.[0]);
   const liked = prevActions.some(a => a.product_id === product.id && a.action === 'like');
   const archived = prevActions.some(a => a.product_id === product.id && a.action === 'archive');
-  const canPrev = !(productIndex === 0 && page === 1);
-  const canNext = !(productIndex === products.length - 1 && page === 2);
-
   return (
     <div className="flex bg-slate-100 lg:p-4" style={{ fontFamily: 'Inter, system-ui, sans-serif', height: '100dvh' }}>
       <main className="mx-auto flex h-full w-full max-w-6xl flex-col overflow-hidden bg-white shadow-2xl lg:rounded-2xl">
@@ -286,7 +427,35 @@ export default function CatalogoPublico() {
           </button>
         </header>
 
-        <section className="min-h-0 flex-1 overflow-y-auto">
+        <div className="relative min-h-0 flex-1 flex flex-col">
+          {/* Zonas de navegación desktop — dentro del contenido, invisibles */}
+          <button
+            onClick={goPrev}
+            disabled={productIndex === 0 && page === 1}
+            className="absolute left-0 inset-y-0 w-14 z-20 hidden xl:flex items-center justify-start pl-2 disabled:pointer-events-none group"
+            aria-label="Anterior"
+          >
+            <span className="opacity-0 group-hover:opacity-100 transition-opacity text-slate-400 text-2xl select-none">‹</span>
+          </button>
+          <button
+            onClick={goNext}
+            disabled={productIndex === catalog.products.length - 1 && page === 2}
+            className="absolute right-0 inset-y-0 w-14 z-20 hidden xl:flex items-center justify-end pr-2 disabled:pointer-events-none group"
+            aria-label="Siguiente"
+          >
+            <span className="opacity-0 group-hover:opacity-100 transition-opacity text-slate-400 text-2xl select-none">›</span>
+          </button>
+
+        <section
+          className="min-h-0 flex-1 overflow-y-auto"
+          onTouchStart={e => { touchStartX.current = e.touches[0].clientX; }}
+          onTouchEnd={e => {
+            if (touchStartX.current === null) return;
+            const diff = touchStartX.current - e.changedTouches[0].clientX;
+            if (Math.abs(diff) > 50) diff > 0 ? goNext() : goPrev();
+            touchStartX.current = null;
+          }}
+        >
           {page === 1 && (
             <div className="relative grid min-h-full items-center gap-5 px-5 pb-6 pt-5 md:grid-cols-[0.9fr_1.1fr] md:px-10 lg:gap-12 lg:px-16 xl:px-20"
               style={product.background_image ? {
@@ -335,66 +504,17 @@ export default function CatalogoPublico() {
             </div>
           )}
 
-          {page === 2 && (
-            <div className="flex flex-col min-h-full bg-white">
-            <div className="grid gap-0 md:grid-cols-2">
-              <div className="border-b border-slate-200 px-5 py-6 md:border-b-0 md:border-r md:px-8 lg:px-12 lg:py-10">
-                <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-teal-700">Beneficios</p>
-                <h1 className="text-2xl font-black leading-tight text-slate-900 lg:text-3xl">{product.name}</h1>
-                {product.benefits?.length > 0 ? (
-                  <ul className="mt-5 space-y-3">
-                    {product.benefits.map((benefit, i) => (
-                      <li key={i} className="flex gap-3 text-sm leading-6 text-slate-600 lg:text-base lg:leading-7">
-                        <span className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-teal-600" />
-                        <span>{benefit}</span>
-                      </li>
-                    ))}
-                  </ul>
-                ) : <p className="mt-4 text-sm text-slate-400">Sin beneficios cargados.</p>}
-              </div>
-
-              <div className="px-5 py-6 md:px-8 lg:px-12 lg:py-10">
-                <p className="mb-4 text-xs font-bold uppercase tracking-[0.18em] text-teal-700">Preparación</p>
-                {product.preparation?.length > 0 ? (
-                  <div className="space-y-3">
-                    {product.preparation.map((step, i) => (
-                      <div key={i} className="flex gap-3 rounded-xl border border-teal-100 bg-teal-50/70 px-4 py-3 text-sm leading-6 text-slate-700 lg:text-base lg:leading-7">
-                        <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-teal-600 text-xs font-bold text-white">{i + 1}</span>
-                        <span>{step}</span>
-                      </div>
-                    ))}
-                  </div>
-                ) : <p className="text-sm text-slate-400">Sin preparación cargada.</p>}
-              </div>
-            </div>{/* fin grid */}
-
-            {/* Ingredientes */}
-            {product.ingredients?.length > 0 && (
-              <div className="px-5 md:px-12 py-5 border-t border-gray-100">
-                <h3 className="font-bold text-gray-700 mb-4 text-sm uppercase tracking-widest text-center">Componentes</h3>
-                <div className="flex flex-wrap justify-center gap-4">
-                  {product.ingredients.map((ing, i) => (
-                    <IngredientIcon key={i} icon={ing.icon} name={ing.name} />
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
+          {page === 2 && <Page2 key={product.id} product={product} />}
         </section>
+        </div>
 
         <BottomBar
-          onPrev={goPrev}
-          onNext={goNext}
-          canPrev={canPrev}
-          canNext={canNext}
           liked={liked}
           archived={archived}
           onLike={() => toggleLike(product.id)}
           onArchive={() => toggleArchive(product.id)}
           onWhatsApp={() => handleWhatsApp(product)}
-          productIndex={productIndex}
-          total={products.length}
+          page={page}
         />
         <div className="flex-shrink-0 bg-white border-t border-slate-100 py-1.5 flex items-center justify-center gap-2">
           <img src="/logo.png" className="h-3 object-contain opacity-30" alt="logo" />
